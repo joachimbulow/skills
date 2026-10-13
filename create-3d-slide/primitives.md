@@ -2,6 +2,8 @@
 
 Diagrams are compositions of shared parts. A part is one component for the whole deck. Slides pass `step` and a size curve. They do not declare their own meshes for these shapes.
 
+Parts follow `step`. Add pointer handlers or extra motion only when the user asks for interaction and describes which parts move and how. Then follow [ANIMATION.md](ANIMATION.md).
+
 ## Story props
 
 Every part accepts these props.

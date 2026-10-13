@@ -1,17 +1,21 @@
 ---
 name: create-3d-slide
 description: >-
-  Create 3D-heavy interactive slides using React Three Fiber (R3F) and
-  open-slide. Use when the user asks to build 3D slides, convert existing
-  slides into interactive 3D presentations, add R3F visual explainers tied to
-  slide steps, or compose reusable parts such as boxes, tables, circles,
-  arrows, stacks, clusters, and cylinders with tunable size and emphasis.
+  Create 3D-heavy slides using React Three Fiber (R3F) and open-slide. Use
+  when the user asks to build 3D slides, convert existing slides into 3D
+  presentations, add R3F visual explainers tied to slide steps, or compose
+  reusable parts such as boxes, tables, circles, arrows, stacks, clusters,
+  and cylinders with tunable size and emphasis. Slides follow the step. Add
+  pointer interaction or extra animation only when the user asks, then follow
+  ANIMATION.md for the parts and motion they describe.
 ---
 
-# Create 3D Interactive Slides (`create-3d-slide`)
+# Create 3D Slides (`create-3d-slide`)
 
 ## Overview
-This skill guides the agent in transforming standard text/component slides into **interactive 3D-heavy slides** inside a React/Vite `open-slide` project. The core pattern relies on **React Three Fiber (R3F)** and **`@react-three/drei`**, where 3D models act as dynamic visual explainers whose state (camera angles, highlights, exploded views, and rotations) is strictly driven by the **slide's step or index**.
+This skill guides the agent in turning text or component slides into **3D slides** inside a React/Vite `open-slide` project. The core pattern relies on **React Three Fiber (R3F)** and **`@react-three/drei`**, where 3D models act as visual explainers whose state (camera angles, highlights, exploded views, and rotations) is driven by the **slide's step or index**.
+
+Slides are not interactable unless the user asks. Step changes still ease size, emphasis, and camera. Click, hover, drag, orbit, and any extra motion wait for an explicit request.
 
 Reuse scene, layout, mesh, and material components across the deck. One shared scene that changes with the step stays cohesive and light to render.
 
@@ -20,7 +24,7 @@ Build diagrams from shared parts. Each part takes a `size` and an `emphasis` tha
 ---
 
 ## When to Use This Skill
-- The user wants to convert existing slides or markdown notes into interactive 3D visualizations.
+- The user wants to convert existing slides or markdown notes into 3D visualizations.
 - The project is verified to be a React/Vite slide setup (such as `open-slide`).
 - The 3D model needs to sync directly with the text narration or bullet points as the presenter steps through the slide.
 - The user asks for a reusable diagram part, or runs one of the part commands above.
@@ -30,8 +34,8 @@ Build diagrams from shared parts. Each part takes a `size` and an `emphasis` tha
 ## Architecture & Core Rules
 
 1. **Strict Step-Driven State:**
-   - Avoid complex mouse raycasting or unpredictable interactive orbit controls for core narration unless requested. 
-   - Tie 3D transformations (`rotation`, `position`, `scale`, `emissive` color intensity) directly to the current slide step integer (`step` or `activeStep` prop).
+   - Drive `rotation`, `position`, `scale`, and emissive intensity from the current slide step (`step` or `activeStep`).
+   - Leave pointer interaction off. Rule 6 is the only path that adds it.
 
 2. **Layout Selection:**
    - **Classic Split Layout:** Use when comparing distinct parts or showing side-by-side technical diagrams (e.g., text/bullet points on the left 40%, R3F Canvas viewport on the right 60%).
@@ -54,6 +58,12 @@ Build diagrams from shared parts. Each part takes a `size` and an `emphasis` tha
    - `size` is a number, `[width, height, depth]`, or a list of `[width, height, depth]` with one entry per step.
    - `emphasis` runs from 0 to 1, or is a list with one entry per step. It changes brightness and opacity.
    - Neighboring parts get different size lists, so the part in focus is larger on its step.
+
+6. **Interaction, only on request:**
+   - Ship the step-driven scene with no click, hover, drag, orbit controls, raycasting, or pointer-follow.
+   - Skip idle motion too: no spin, float, wobble, or trail unless the user asked for that motion.
+   - When the user asks, they name the parts and how those parts should move. Read [ANIMATION.md](ANIMATION.md) and implement only that motion.
+   - Use the smooth techniques in that guide: `useFrame` with delta, smooth damping, or springs. Match the motion they described. Leave every other part on the step path.
 
 ---
 
@@ -93,6 +103,8 @@ Copy a part from `assets/parts/` only when the project does not already have it.
    - Pass the same `step` into every part, with a `size` list that matches the narration.
    - Create a new part only when nothing in the catalog can carry this metaphor. Follow `/3d-part`.
    - Assemble the slide with the existing layout shell, typography, and step indicators.
+   - If the user did not ask for interaction or a specific animation, stop here.
+   - If they did, read [ANIMATION.md](ANIMATION.md). Animate only the parts they named, in the way they described, using a smooth technique from that guide.
 
 ---
 
