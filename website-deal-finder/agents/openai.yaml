@@ -1,0 +1,4 @@
+interface:
+  display_name: "Website Deal Finder"
+  short_description: "Find verified shopping deals on a chosen website"
+  default_prompt: "Use $website-deal-finder to find the best deals on this website within my budget, verify the strongest offers, and save a comparison with links."
